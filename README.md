@@ -108,3 +108,25 @@ The consistent hash map (`hash_map/consistent_hash.py`) was tested using Pythonâ
   - Request Mapping: Tests H(i) = i + 2i + 2172 for sample requests.
   - Add Server: Adds Server4 and verifies 9 new slots.
   - Remove Server: Removes Server1 and verifies slots are cleared.
+
+## Load Balancer Implementation (Task 3.1)
+
+### Overview
+The load balancer is implemented in `load_balancer/app.py` using Flask. It uses the `ConsistentHashMap` from Task 2 to distribute requests across 3 server replicas and supports adding/removing servers dynamically.
+
+### Implementation Details
+- **Endpoints**:
+  - `GET /<int:request_id>`: Forwards requests to a server based on the consistent hash map. Returns serverâ€™s `/home` response or 503 if no servers are available.
+  - `POST /add`: Adds a server with JSON payload `{"server_id": int, "port": int}`. Returns `{"message": "Successfully added", "status": "successful"}` (HTTP 200).
+  - `POST /rm`: Removes a server with JSON payload `{"server_id": int}`. Returns `{"message": "Successfully removed", "status": "successful"}` (HTTP 200) or 404 if server not found.
+- **Configuration**:
+  - Runs on port 6000.
+  - Uses `ConsistentHashMap` with N=3, H_slots=512, K=9.
+  - Servers are addressed as `http://server<server_id>:5000` (to be updated for Docker networking).
+- **Dependencies**: Flask and requests (listed in `load_balancer/requirements.txt`).
+
+### Design Choices
+- Flask was chosen for consistency with the server implementation.
+- The `requests` library simplifies HTTP forwarding to servers.
+- The `servers` dictionary maps server names to addresses, updated dynamically via `/add` and `/rm`.
+- Error handling ensures 503 for unavailable servers and 404 for invalid endpoints or server removal.
