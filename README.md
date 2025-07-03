@@ -85,3 +85,26 @@ The consistent hash map is implemented in `hash_map/consistent_hash.py` to map c
 - The `server_to_slots` dictionary simplifies server removal by tracking slot assignments.
 - Hash functions are implemented exactly as specified to ensure consistent distribution.
 
+## Consistent Hash Map Testing (Task 2.2)
+
+### Overview
+The consistent hash map (`hash_map/consistent_hash.py`) was tested using Python’s `unittest` framework in `tests/test_consistent_hash.py` to verify correct initialization, virtual server placement, request mapping, and server addition/removal.
+
+### Testing Steps
+1. Ensure the virtual environment is active:
+   ```bash
+   cd ~/load_balancer_project
+   source venv/bin/activate
+   ```
+
+2. Run unit tests that were setup
+  ```bash
+  python -m unittest tests/test_consistent_hash.py -v
+  ```
+
+3. Tests performed:
+  - Initialization: Verifies 512 slots, 3 servers, 9 virtual servers each, and 27 total virtual servers.
+  - Virtual Server Placement: Checks Φ(i, j) = i + j + 2j + 25 with linear probing.
+  - Request Mapping: Tests H(i) = i + 2i + 2172 for sample requests.
+  - Add Server: Adds Server4 and verifies 9 new slots.
+  - Remove Server: Removes Server1 and verifies slots are cleared.
