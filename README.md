@@ -53,4 +53,5 @@ The Flask server is containerized using a `Dockerfile` in the `server` directory
     ```bash
     curl http://localhost:5000/home
     curl http://localhost:5000/heartbeat
+    curl http://localhost:5000/bad # Should return a 404 status error 
     ```
