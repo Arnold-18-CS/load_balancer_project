@@ -101,4 +101,5 @@ class ConsistentHashMap:
             current_slot = (slot + i) % self.num_slots
             if self.hash_ring[current_slot] is not None:
                 return self.hash_ring[current_slot]
-        return None  # Fallback if no server is found (should not happen with valid setup)
+        return None
+    # Fallback if no server is found (should not happen with valid setup)
