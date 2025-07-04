@@ -174,7 +174,7 @@ Tested with three server containers (`load-balancer-server`) in a Docker network
   ```
 
 5. Test endpoints using the `load_balancer_tests.http` file.
-  - Install the REST Client extension in VS Code (`humao.rest-client`).
+  - Install the REST Client extension in VS Code.
   - Open `load_balancer_tests.http` in VS Code.
 
 6. Clean up:
