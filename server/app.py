@@ -1,37 +1,32 @@
+from flask import Flask, jsonify
 import os
-from flask import Flask
 
-# Initialize Flask application
 app = Flask(__name__)
 
-# Get server ID from env var, defaulting it to 'Unkown' if it is not set
+# Get server ID from environment variable
 SERVER_ID = os.getenv('SERVER_ID', 'Unknown')
-# Set it in the terminal using export SERVER_ID = Something
 
 @app.route('/home', methods=['GET'])
 def home():
     """
-      Endpoint: /home (GET)
-      Returns a JSON response with a unique server ID and status.
-      Response format: {"message": "Hello from Server: [ID]", "status": "successful"}
-      HTTP Status: 200
+    Return a greeting message with the server ID.
+    :return: JSON response with server ID and status.
     """
-    return {
-        "message" : f"Hello from Server: {SERVER_ID}",
-        "status": "Successful"
-    }, 200
+    return jsonify({
+        "message": f"Hello from Server: {SERVER_ID}",
+        "status": "successful"
+    }), 200
 
 @app.route('/heartbeat', methods=['GET'])
 def heartbeat():
     """
-      Endpoint: /heartbeat (GET)
-      Returns an empty JSON response to indicate the server is alive.
-      Response format: {}
-      HTTP Status: 200
+    Return a simple response to indicate the server is alive.
+    :return: JSON response with server ID and alive status.
     """
-    return {}, 200
-
+    return jsonify({
+        "server_id": SERVER_ID,
+        "status": "alive"
+    }), 200
 
 if __name__ == '__main__':
-    # Run the server on all interfaces at port 5000
     app.run(host='0.0.0.0', port=5000)
