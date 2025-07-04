@@ -1,0 +1,174 @@
+# Load Balancer Test Suite for VS Code REST Client
+# This file contains HTTP requests to test the load balancer endpoints
+# for Task 3 of the load balancer project.
+# Prerequisites:
+# 1. Ensure Docker is running in WSL Ubuntu 20.04.
+# 2. Build the server and load balancer images:
+#    cd ~/load_balancer_project/server
+#    docker build -t load-balancer-server .
+#    cd ~/load_balancer_project
+#    docker build -t load-balancer .
+# 3. Create a Docker network:
+#    docker network create load-balancer-net
+# 4. Run three server containers:
+#    docker run -d --name server1 --network load-balancer-net -e SERVER_ID=1 load-balancer-server
+#    docker run -d --name server2 --network load-balancer-net -e SERVER_ID=2 load-balancer-server
+#    docker run -d --name server3 --network load-balancer-net -e SERVER_ID=3 load-balancer-server
+# 5. Run the load balancer:
+#    docker run -d --name load-balancer --network load-balancer-net -p 6000:6000 load-balancer
+# 6. Open this file in VS Code with the REST Client extension installed.
+# 7. Click "Send Request" above each request to execute it.
+# Variables:
+# - {{host}}: The load balancer host (default: localhost:6000)
+# - {{request_id}}: Integer for request ID (e.g., 0, 1, 10, 100)
+# - {{server_id}}: Integer for server ID (e.g., 4)
+# - {{port}}: Port for server (default: 5000)
+
+@host = localhost:6000
+@request_id = 0
+@server_id = 4
+@port = 5000
+
+### Test GET /<int:request_id> - Forward request to a server
+# Purpose: Sends a request with a given request_id to the load balancer,
+# which uses the consistent hash map to select a server (server1, server2, or server3)
+# and forwards the request to its /home endpoint.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Hello from Server: X", "status": "successful"}
+#   where X is the server ID (1, 2, or 3) based on the hash map.
+# Template: Replace {{request_id}} with any integer (e.g., 0, 1, 10, 100).
+GET http://{{host}}/{{request_id}}
+Content-Type: application/json
+
+### Example: GET /0
+# Purpose: Tests request distribution with request_id=0.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Hello from Server: X", "status": "successful"}
+GET http://{{host}}/0
+Content-Type: application/json
+
+### Example: GET /1
+# Purpose: Tests request distribution with request_id=1.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Hello from Server: X", "status": "successful"}
+GET http://{{host}}/1
+Content-Type: application/json
+
+### Example: GET /10
+# Purpose: Tests request distribution with request_id=10.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Hello from Server: X", "status": "successful"}
+GET http://{{host}}/10
+Content-Type: application/json
+
+### Example: GET /100
+# Purpose: Tests request distribution with request_id=100.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Hello from Server: X", "status": "successful"}
+GET http://{{host}}/100
+Content-Type: application/json
+
+### Test POST /add - Add a new server
+# Purpose: Adds a new server to the load balancer’s hash map and server list.
+# Requires a running server container (e.g., server4) on the load-balancer-net network.
+# Setup: Run a new server container before sending this request:
+#   docker run -d --name server4 --network load-balancer-net -e SERVER_ID=4 load-balancer-server
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Successfully added", "status": "successful"}
+# Template: Replace {{server_id}} and {{port}} as needed.
+POST http://{{host}}/add
+Content-Type: application/json
+
+{
+    "server_id": {{server_id}},
+    "port": {{port}}
+}
+
+### Example: POST /add - Add Server4
+# Purpose: Adds Server4 (server_id=4, port=5000) to the load balancer.
+# Setup: Ensure server4 is running (see setup above).
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Successfully added", "status": "successful"}
+POST http://{{host}}/add
+Content-Type: application/json
+
+{
+    "server_id": {{server_id}},
+    "port": {{port}}
+}
+
+### Test POST /rm - Remove a server
+# Purpose: Removes a server from the load balancer’s hash map and server list.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Successfully removed", "status": "successful"}
+# - If server_id doesn’t exist: 404 with {"message": "Server not found", "status": "error"}
+# Template: Replace {{server_id}} with the ID of a server to remove (e.g., 3).
+POST http://{{host}}/rm
+Content-Type: application/json
+
+{
+    "server_id": {{server_id}}
+}
+
+### Example: POST /rm - Remove Server3
+# Purpose: Removes Server3 (server_id=3) from the load balancer.
+# Expected Response:
+# - Status: 200 OK
+# - Body: {"message": "Successfully removed", "status": "successful"}
+POST http://{{host}}/rm
+Content-Type: application/json
+
+{
+    "server_id": 3
+}
+
+### Test Error: Invalid Endpoint (404)
+# Purpose: Tests a non-existent endpoint to verify 404 error handling.
+# Expected Response:
+# - Status: 404 Not Found
+# - Body: {"message": "404 Not Found: The requested URL was not found on the server. ..."}
+GET http://{{host}}/invalid
+Content-Type: application/json
+
+### Test Error: Invalid /add Payload (400)
+# Purpose: Sends an invalid payload to /add to verify 400 error handling.
+# Expected Response:
+# - Status: 400 Bad Request
+# - Body: {"message": "Invalid request data", "status": "error"}
+POST http://{{host}}/add
+Content-Type: application/json
+
+{
+    "invalid_field": {{server_id}}
+}
+
+### Test Error: Non-existent Server Removal (404)
+# Purpose: Attempts to remove a non-existent server to verify 404 error handling.
+# Expected Response:
+# - Status: 404 Not Found
+# - Body: {"message": "Server not found", "status": "error"}
+POST http://{{host}}/rm
+Content-Type: application/json
+
+{
+    "server_id": 999
+}
+
+### Test Error: No Servers Available (503)
+# Purpose: Tests the load balancer when no servers are available.
+# Setup: Stop all server containers before sending this request:
+#   docker stop server1 server2 server3 server4
+# Expected Response:
+# - Status: 503 Service Unavailable
+# - Body: {"message": "No servers available", "status": "error"}
+GET http://{{host}}/{{request_id}}
+Content-Type: application/json
+EOF

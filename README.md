@@ -173,7 +173,9 @@ Tested with three server containers (`load-balancer-server`) in a Docker network
   docker run -d --name load-balancer --network load-balancer-net -p 6000:6000 load-balancer
   ```
 
-5. Test endpoints using the `test_links.rest` file.
+5. Test endpoints using the `load_balancer_tests.http` file.
+  - Install the REST Client extension in VS Code (`humao.rest-client`).
+  - Open `load_balancer_tests.http` in VS Code.
 
 6. Clean up:
   ```bash
