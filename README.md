@@ -158,7 +158,7 @@ Tested with three server containers (`load-balancer-server`) in a Docker network
 
 2. Create a Docker network:
   ```bash
-  docker networkc reate load-balancer-net
+  docker network create load-balancer-net
   ```
 
 3. Run three server containers:
