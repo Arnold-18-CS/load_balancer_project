@@ -12,7 +12,7 @@ def fetch_bulk_data(host, request_ids):
     url = f"http://{host}/bulk"
     payload = {"request_ids": request_ids}
     try:
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, json=payload, timeout=100)
         response.raise_for_status()
         data = response.json()
         return data.get("request_counts", {})
@@ -42,7 +42,7 @@ def plot_request_distribution(request_counts, output_file="request_distribution.
 
 if __name__ == "__main__":
     # Send 1000 requests for analysis
-    request_ids = list(range(1000))
+    request_ids = list(range(100))
     host = "localhost:6000"
     request_counts = fetch_bulk_data(host, request_ids)
     if request_counts:
