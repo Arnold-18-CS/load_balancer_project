@@ -17,7 +17,7 @@ def reset_request_counts(host):
     except Exception as e:
         print(f"Error resetting request counts: {e}")
 
-def fetch_bulk_data(host, request_ids, max_retries=3, timeout=10):
+def fetch_bulk_data(host, request_ids, max_retries=3, timeout=500):
     """
     Send bulk requests to the load balancer and return request counts.
     :param host: Load balancer host (e.g., localhost:6000)
