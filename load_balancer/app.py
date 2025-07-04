@@ -1,5 +1,5 @@
-import requests
 from flask import Flask, request, jsonify
+import requests
 from hash_map.consistent_hash import ConsistentHashMap
 
 app = Flask(__name__)
@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Initialize consistent hash map with 3 servers, 512 slots, 9 virtual servers
 ch = ConsistentHashMap(num_slots=512, num_servers=3, virtual_servers=9)
 
-# Dictionary to store server addresses (e.g., {"Server1": "http://server1:5000"})
+# Dictionary to store server addresses
 servers = {
     "Server1": "http://server1:5000",
     "Server2": "http://server2:5000",
@@ -27,7 +27,6 @@ def forward_request(request_id):
     if server_name not in servers:
         return jsonify({"message": "No servers available", "status": "error"}), 503
     try:
-        # Forward request to the server's /home endpoint
         response = requests.get(f"{servers[server_name]}/home")
         response.raise_for_status()
         return jsonify(response.json()), 200
@@ -47,7 +46,6 @@ def add_server():
     server_id = data['server_id']
     port = data['port']
     server_name = f"Server{server_id}"
-    # Add server to hash map and servers dictionary
     ch.add_server(server_name, server_id)
     servers[server_name] = f"http://server{server_id}:{port}"
     return jsonify({"message": "Successfully added", "status": "successful"}), 200
@@ -66,7 +64,6 @@ def remove_server():
     server_name = f"Server{server_id}"
     if server_name not in servers:
         return jsonify({"message": "Server not found", "status": "error"}), 404
-    # Remove server from hash map and servers dictionary
     ch.remove_server(server_name)
     del servers[server_name]
     return jsonify({"message": "Successfully removed", "status": "successful"}), 200

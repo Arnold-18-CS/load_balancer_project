@@ -1,4 +1,4 @@
-# Load Balancer Project
+# Load Balancer Project Process
 
 ## Server Implementation (Task 1.1)
 
@@ -124,9 +124,65 @@ The load balancer is implemented in `load_balancer/app.py` using Flask. It uses 
   - Uses `ConsistentHashMap` with N=3, H_slots=512, K=9.
   - Servers are addressed as `http://server<server_id>:5000` (to be updated for Docker networking).
 - **Dependencies**: Flask and requests (listed in `load_balancer/requirements.txt`).
+- **Dockerfile**: Located in project root, copies `hash_map/` and `load_balancer/` files.
 
 ### Design Choices
 - Flask was chosen for consistency with the server implementation.
 - The `requests` library simplifies HTTP forwarding to servers.
 - The `servers` dictionary maps server names to addresses, updated dynamically via `/add` and `/rm`.
 - Error handling ensures 503 for unavailable servers and 404 for invalid endpoints or server removal.
+
+# Load Balance How to Use
+
+### Overview
+The server is implemented in `server/app.py`, responding to `/home` with a greeting based on `SERVER_ID`.
+
+### Implementation Details
+- **Endpoint**: `GET /home` returns `{"message": "Hello from Server: X", "status": "successful"}`.
+- **Dependencies**: Flask (`server/requirements.txt`).
+- **Dockerfile**: Located in `server/`, builds `load-balancer-server` image.
+
+## Load Balancer Testing (Task 3)
+
+### Overview
+Tested with three server containers (`load-balancer-server`) in a Docker network (`load-balancer-net`).
+
+### Testing Steps
+1. Build the server and load balancer images:
+   ```bash
+   cd ~/load_balancer_project/server
+   docker build -t load-balancer-server .
+   cd ~/load_balancer_project
+   docker build -t load-balancer .
+   ```
+
+2. Create a Docker network:
+  ```bash
+  docker networkc reate load-balancer-net
+  ```
+
+3. Run three server containers:
+  ```bash
+  docker run -d --name server1 --network load-balancer-net -e SERVER_ID=1 load-balancer-server
+  docker run -d --name server2 --network load-balancer-net -e SERVER_ID=2 load-balancer-server
+  docker run -d --name server3 --network load-balancer-net -e SERVER_ID=3 load-balancer-server
+  ```
+
+4. Run the load balancer:
+  ```bash
+  docker run -d --name load-balancer --network load-balancer-net -p 6000:6000 load-balancer
+  ```
+
+5. Test endpoints using the `test_links.rest` file.
+
+6. Clean up:
+  ```bash
+  docker stop load-balancer server1 server2 server3 server4
+  docker network rm load-balancer-net
+  ```
+
+### Observations
+- Requests are distributed based on the consistent hash map.
+- Adding/removing servers works correctly.
+- Error handling meets requirements (404, 400, 503).
+- Fixed server container ModuleNotFoundError by correcting server/app.py.
