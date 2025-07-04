@@ -147,7 +147,15 @@ The server is implemented in `server/app.py`, responding to `/home` with a greet
 ### Overview
 Tested with three server containers (`load-balancer-server`) in a Docker network (`load-balancer-net`).
 
-### Testing Steps
+### Setup - Automatic
+1. Use the automatic script to build the complete project
+  ```bash
+  d ~/load_balancer_project
+  chmod +x run_tests.sh
+  ./run_tests.sh
+  ```
+
+### Setup - Manual
 1. Build the server and load balancer images:
    ```bash
    cd ~/load_balancer_project/server
@@ -173,13 +181,17 @@ Tested with three server containers (`load-balancer-server`) in a Docker network
   docker run -d --name load-balancer --network load-balancer-net -p 6000:6000 load-balancer
   ```
 
-5. Test endpoints using the `load_balancer_tests.http` file.
+### Testing the services
+
+1. Test endpoints using the `load_balancer_tests.http` file.
   - Install the REST Client extension in VS Code.
   - Open `load_balancer_tests.http` in VS Code.
 
-6. Clean up:
+### Cleaning up the setup (if manual setup was done)
+1. Clean up:
   ```bash
   docker stop load-balancer server1 server2 server3 server4
+  docker rm load-balancer server1 server2 server3 server4
   docker network rm load-balancer-net
   ```
 
@@ -187,4 +199,3 @@ Tested with three server containers (`load-balancer-server`) in a Docker network
 - Requests are distributed based on the consistent hash map.
 - Adding/removing servers works correctly.
 - Error handling meets requirements (404, 400, 503).
-- Fixed server container ModuleNotFoundError by correcting server/app.py.
