@@ -1,3 +1,3 @@
-numbers = list(range(1, 10001))
+numbers = list(range(1, 301))
 print("Starting to process numbers...")
 print(numbers)
